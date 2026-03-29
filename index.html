@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE ULTIMATE STUPIDITY CRUSADE</title>
+    <title>THE IQ DESTRUCTOR</title>
     <style>
         :root {
             --bg: #050510;
             --panel: #121225;
             --accent: #00ffcc;
             --fail: #ff0055;
-            --success: #00ccff;
+            --success: #00ff44;
         }
 
         body {
-            font-family: 'Trebuchet MS', sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             background-color: var(--bg);
             color: white;
             margin: 0;
@@ -23,6 +23,7 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
+            touch-action: manipulation;
         }
 
         #game-container {
@@ -34,23 +35,15 @@
             border-radius: 40px;
             text-align: center;
             box-shadow: 0 0 40px rgba(0, 255, 204, 0.2);
-            position: relative;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            margin-bottom: 10px;
-            color: #888;
+            transition: background 0.3s;
         }
 
         #iq-display {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 900;
             color: var(--accent);
             margin: 10px 0;
-            text-shadow: 0 0 10px var(--accent);
+            transition: transform 0.2s;
         }
 
         #q-area {
@@ -62,8 +55,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            border: 1px dashed var(--accent);
+            font-size: 1.1rem;
+            border: 2px solid #333;
         }
 
         .grid {
@@ -80,60 +73,59 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s ease;
             font-size: 0.9rem;
+            position: relative;
         }
 
-        button:hover { background: #353565; transform: translateY(-2px); }
-        button:active { transform: scale(0.9); }
-
-        .footer {
-            margin-top: 25px;
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
+        /* The "Right Answer" highlight */
+        .reveal-right {
+            background: var(--success) !important;
+            color: black !important;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px var(--success);
+            z-index: 10;
         }
+
+        /* The "Wrong Choice" highlight */
+        .reveal-wrong {
+            background: var(--fail) !important;
+            animation: shake 0.3s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shrink-iq { transform: scale(0.5); color: var(--fail) !important; }
 
         .hidden { display: none !important; }
-        
-        /* Chaos Effects */
-        .shake { animation: shake 0.2s infinite; }
-        @keyframes shake {
-            0% { transform: translate(1px, 1px); }
-            50% { transform: translate(-2px, -1px); }
-            100% { transform: translate(1px, -1px); }
-        }
-
-        .flash-red { animation: f-red 0.3s; }
-        @keyframes f-red { 0% { background: var(--fail); } 100% { background: var(--panel); } }
+        .footer { margin-top: 25px; display: flex; justify-content: space-around; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="header">
-        <span>LVL: <span id="l-num">1</span>/50</span>
-        <span id="rank-text">STATUS: GENIUS</span>
-    </div>
-
+    <div style="font-size: 0.8rem; opacity: 0.6;">STUPIDITY EXAM: LVL <span id="l-num">1</span>/50</div>
     <div id="iq-display">IQ: 150</div>
 
     <div id="play-zone">
-        <div id="q-area">Question goes here...</div>
+        <div id="q-area">Preparing brain cells...</div>
         <div class="grid" id="btn-grid">
-            <button onclick="check(0)" id="b0"></button>
-            <button onclick="check(1)" id="b1"></button>
-            <button onclick="check(2)" id="b2"></button>
-            <button onclick="check(3)" id="b3"></button>
+            <button id="b0">Option 1</button>
+            <button id="b1">Option 2</button>
+            <button id="b2">Option 3</button>
+            <button id="b3">Option 4</button>
         </div>
     </div>
 
     <div id="end-zone" class="hidden">
-        <h1 style="color: var(--fail);">TEST COMPLETE</h1>
-        <p>Your Final Stupidity Score:</p>
-        <div id="final-perc" style="font-size: 3.5rem; font-weight: bold;">0%</div>
-        <p id="commentary" style="font-style: italic;"></p>
-        <button onclick="location.reload()" style="background: var(--accent); color: black; margin-top: 20px;">I CAN DO BETTER</button>
+        <h1 style="color: var(--fail);">RESULT</h1>
+        <div id="final-perc" style="font-size: 3rem;">0% STUPID</div>
+        <p id="commentary"></p>
+        <button onclick="location.reload()" style="background: white; color: black; padding: 10px 20px;">RESET BRAIN</button>
     </div>
 
     <div class="footer">
@@ -147,36 +139,27 @@
     let stupid = 0;
     let clever = 0;
     let iq = 150;
+    let acceptingInput = true;
 
     const questions = [
         { q: "What is 1+1?", a: ["2", "11", "Window", "Both A & C"], c: 3 },
         { q: "How many letters in 'The Alphabet'?", a: ["26", "11", "7", "None"], c: 1 },
         { q: "What do cows drink?", a: ["Milk", "Water", "Grass", "Soda"], c: 1 },
-        { q: "Which animal says 'Meow'?", a: ["Cat", "Dog", "Tiger", "A Liar"], c: 3 },
-        { q: "Click the BLUE button.", a: ["Blue", "Red", "Green", "Yellow"], c: 0 },
+        { q: "Spell 'YEP' backwards.", a: ["PEY", "YEP", "EPY", "NO"], c: 0 },
+        { q: "Which animal is a Fish?", a: ["Whale", "Shark", "Dolphin", "Submarine"], c: 1 },
+        { q: "Click the answer 'B'.", a: ["A", "C", "D", "B"], c: 3 },
+        { q: "What color is a Mirror?", a: ["Silver", "White", "Green", "Blue"], c: 2 },
+        { q: "How many months have 28 days?", a: ["1", "2", "12", "None"], c: 2 },
+        { q: "Click 'The Answer'.", a: ["Wrong", "The Answer", "Not this", "Actually No"], c: 1 },
         { q: "If 1=5, 2=25, 3=125, what does 5=?", a: ["625", "3125", "1", "5"], c: 3 },
-        { q: "Spell 'POTATO' backwards.", a: ["OTATOP", "POTATO", "EGG", "OTAT-O"], c: 0 },
-        { q: "What color is an Orange?", a: ["Yellow", "Orange", "Red", "Fruit"], c: 1 },
-        { q: "Which is heavier: 1kg of Lead or 1kg of Air?", a: ["Lead", "Air", "Equal", "Lead (obviously)"], c: 2 },
-        { q: "Click the smallest number:", a: ["10", "1", "0.1", "The dot above the 'i'"], c: 3 },
-        { q: "Are you paying attention?", a: ["Yes", "No", "Maybe", "What?"], c: 3 },
-        { q: "Which of these is a shape?", a: ["Square", "Circle", "Triangle", "All of them"], c: 3 },
-        { q: "How many months have 28 days?", a: ["1", "6", "12", "Depends"], c: 2 },
-        { q: "What is 9 + 10?", a: ["19", "21", "910", "A mess"], c: 1 },
-        { q: "What is the capital of France?", a: ["Paris", "F", "London", "Berlin"], c: 1 },
-        { q: "If I have 2 apples and you take 2, how many do you have?", a: ["0", "2", "4", "None"], c: 1 },
-        { q: "Which way is Left?", a: ["Right", "Up", "Left", "That way"], c: 2 },
-        { q: "Can a match box?", a: ["No", "Yes", "Fire", "No, but a tin can"], c: 3 },
-        { q: "Is this question 19?", a: ["Yes", "No", "Maybe", "Level 19"], c: 0 },
-        { q: "Click the 'Next' button.", a: ["Finish", "Stop", "Back", "Next"], c: 3 },
-        // Random generation for the rest to reach 50
+        // ... (more questions added programmatically below)
     ];
 
-    for(let i=21; i<=50; i++) {
+    for(let i=11; i<=50; i++) {
         questions.push({
-            q: `Quick! Pick choice number ${(i % 4) + 1}!`,
-            a: ["Choice 1", "Choice 2", "Choice 3", "Choice 4"],
-            c: i % 4
+            q: `Level ${i}: Click the button that says '${i}'`,
+            a: ["Nope", i.toString(), "Not here", "Wrong"],
+            c: 1
         });
     }
 
@@ -186,49 +169,52 @@
             return;
         }
         
+        acceptingInput = true;
         const data = questions[cur];
         document.getElementById('l-num').innerText = cur + 1;
         document.getElementById('q-area').innerText = data.q;
-        
-        let indices = [0, 1, 2, 3];
-        // Chaos Mode: After Level 25, shuffle button display
-        if(cur > 25) {
-            indices.sort(() => Math.random() - 0.5);
-            document.getElementById('game-container').classList.toggle('shake', Math.random() > 0.8);
-        }
 
-        indices.forEach((val, i) => {
+        for(let i=0; i<4; i++) {
             const btn = document.getElementById(`b${i}`);
-            btn.innerText = data.a[val];
-            btn.onclick = () => check(val);
-            // Randomly change colors in chaos mode
-            if(cur > 35) btn.style.background = `hsl(${Math.random()*360}, 50%, 30%)`;
-        });
+            btn.innerText = data.a[i];
+            btn.className = ""; // Reset effects
+            btn.onclick = () => check(i);
+        }
     }
 
     function check(idx) {
-        if(idx === questions[cur].c) {
+        if(!acceptingInput) return;
+        acceptingInput = false;
+
+        const correctIdx = questions[cur].c;
+
+        if(idx === correctIdx) {
             clever++;
             document.getElementById('c-count').innerText = clever;
+            // Immediate next
+            cur++;
+            render();
         } else {
             stupid++;
             iq -= 4;
             document.getElementById('s-count').innerText = stupid;
-            document.getElementById('iq-display').innerText = "IQ: " + iq;
-            document.getElementById('game-container').classList.add('flash-red');
-            setTimeout(() => document.getElementById('game-container').classList.remove('flash-red'), 300);
+            
+            // Visual Shame Effect
+            document.getElementById(`b${idx}`).classList.add('reveal-wrong');
+            document.getElementById(`b${correctIdx}`).classList.add('reveal-right');
+            
+            // IQ Shrink effect
+            const iqDisp = document.getElementById('iq-display');
+            iqDisp.innerText = "IQ: " + iq;
+            iqDisp.classList.add('shrink-iq');
+
+            // Wait 1 second so they can see their mistake
+            setTimeout(() => {
+                iqDisp.classList.remove('shrink-iq');
+                cur++;
+                render();
+            }, 1000);
         }
-
-        // Rank Logic
-        let r = "GENIUS";
-        if(iq < 120) r = "AVERAGE";
-        if(iq < 90) r = "DIM";
-        if(iq < 60) r = "POTATO";
-        if(iq < 30) r = "ERR_BRAIN_NOT_FOUND";
-        document.getElementById('rank-text').innerText = "STATUS: " + r;
-
-        cur++;
-        render();
     }
 
     function finish() {
@@ -236,12 +222,7 @@
         document.getElementById('end-zone').classList.remove('hidden');
         const score = Math.round((stupid / 50) * 100);
         document.getElementById('final-perc').innerText = score + "% STUPID";
-        
-        let msg = "You're actually quite smart!";
-        if(score > 40) msg = "You might want to go back to school.";
-        if(score > 70) msg = "How did you manage to open this website?";
-        if(score >= 95) msg = "You are a legendary level of stupid.";
-        document.getElementById('commentary').innerText = msg;
+        document.getElementById('commentary').innerText = score > 50 ? "Your brain is a smooth potato." : "Actually impressive.";
     }
 
     render();
