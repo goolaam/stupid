@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate Stupidity Test</title>
+    <style>
+        :root {
+            --bg: #0f0f1a;
+            --primary: #00f2ff;
+            --secondary: #ff007b;
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        #game-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 0 20px var(--primary);
+            max-width: 90%;
+            width: 400px;
+            position: relative;
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 20px; color: var(--primary); }
+        
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            transition: transform 0.1s, background 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-left { background: var(--primary); color: #000; }
+        .btn-right { background: var(--secondary); color: #fff; }
+
+        button:active { transform: scale(0.9); }
+
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            40% { transform: translate(3px, 2px) rotate(-1deg); }
+            100% { transform: translate(1px, -1px) rotate(0deg); }
+        }
+
+        #score-screen { display: none; }
+        .hidden { display: none !important; }
+        
+        #lvl-counter { position: absolute; top: 10px; right: 20px; font-size: 0.8rem; opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="lvl-counter">Level: <span id="current-lvl">1</span>/50</div>
+    
+    <div id="quiz-screen">
+        <h1 id="question">Loading...</h1>
+        <div class="btn-container" id="button-wrapper">
+            <button id="btn1" class="btn-left" onclick="handleChoice(0)">Option A</button>
+            <button id="btn2" class="btn-right" onclick="handleChoice(1)">Option B</button>
+        </div>
+    </div>
+
+    <div id="score-screen">
+        <h1>RESULTS ARE IN...</h1>
+        <p style="font-size: 1.2rem;">You are officially:</p>
+        <div id="percentage" style="font-size: 3rem; color: var(--secondary); font-weight: bold;">0%</div>
+        <p id="rank-text">STUPID</p>
+        <button onclick="location.reload()" style="background: white; color: black; margin-top: 20px;">TRY TO BE LESS DUMB?</button>
+    </div>
+</div>
+
+<script>
+    let currentLevel = 0;
+    let stupidScore = 0;
+
+    const questions = [
+        { q: "Click the Blue Button!", a: ["Blue", "Red"], correct: 0 },
+        { q: "Which is heavier: 1kg of Lead or 1kg of Feathers?", a: ["Lead", "Feathers"], correct: 1, twist: "Both are equal but feathers is funnier" },
+        { q: "Don't click the Right button!", a: ["Left", "Right"], correct: 0 },
+        { q: "What is 2 + 2?", a: ["4", "Fish"], correct: 1 },
+        { q: "Which button looks tastier?", a: ["This one", "No, this one"], correct: 0 },
+        { q: "Is this a game?", a: ["Yes", "Maybe"], correct: 1 },
+        { q: "Quick! Click the Red button!", a: ["Red", "Blue"], correct: 0 }, // Swapped colors in logic? No, just keep it simple.
+        { q: "The answer to this is B.", a: ["A", "B"], correct: 1 },
+        { q: "Wait, where is the question?", a: ["What?", "Here"], correct: 1 },
+        { q: "Square root of a Potato?", a: ["French Fries", "Mashed"], correct: 0 },
+        // Generating more levels programmatically for the sake of 50...
+    ];
+
+    // Filling up to 50 levels with wacky stuff
+    for(let i = 11; i <= 50; i++) {
+        questions.push({
+            q: `Level ${i}: Click a button, any button.`,
+            a: [Math.random() > 0.5 ? "Wrong" : "Right", Math.random() > 0.5 ? "Stupid" : "Smart"],
+            correct: Math.floor(Math.random() * 2)
+        });
+    }
+
+    function updateLevel() {
+        if (currentLevel >= questions.length) {
+            showResults();
+            return;
+        }
+
+        const qData = questions[currentLevel];
+        const qElement = document.getElementById('question');
+        const btn1 = document.getElementById('btn1');
+        const btn2 = document.getElementById('btn2');
+        
+        qElement.innerText = qData.q;
+        btn1.innerText = qData.a[0];
+        btn2.innerText = qData.a[1];
+        document.getElementById('current-lvl').innerText = currentLevel + 1;
+
+        // Apply "Twists"
+        const wrapper = document.getElementById('button-wrapper');
+        wrapper.style.flexDirection = Math.random() > 0.7 ? "row-reverse" : "row";
+        if(currentLevel % 5 === 0) {
+            document.getElementById('game-container').classList.add('shake');
+            setTimeout(() => document.getElementById('game-container').classList.remove('shake'), 500);
+        }
+    }
+
+    function handleChoice(index) {
+        if (index !== questions[currentLevel].correct) {
+            stupidScore++;
+        }
+        
+        currentLevel++;
+        updateLevel();
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('score-screen').style.display = 'block';
+        
+        const percent = Math.round((stupidScore / 50) * 100);
+        document.getElementById('percentage').innerText = percent + "% STUPID";
+        
+        let rank = "GENIUS (Liar)";
+        if(percent > 20) rank = "Slightly Dim";
+        if(percent > 50) rank = "Certified Potato";
+        if(percent > 80) rank = "A Toaster could do better";
+        if(percent >= 98) rank = "THE STUPID KING";
+        
+        document.getElementById('rank-text').innerText = rank;
+    }
+
+    // Initialize
+    updateLevel();
+</script>
+
+</body>
+</html>
