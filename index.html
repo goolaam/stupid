@@ -3,177 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Ultimate Stupidity Test</title>
+    <title>THE ULTIMATE STUPIDITY CRUSADE</title>
     <style>
         :root {
-            --bg: #0f0f1a;
-            --primary: #00f2ff;
-            --secondary: #ff007b;
-            --text: #ffffff;
+            --bg: #050510;
+            --panel: #121225;
+            --accent: #00ffcc;
+            --fail: #ff0055;
+            --success: #00ccff;
         }
 
         body {
-            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            font-family: 'Trebuchet MS', sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: white;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
             overflow: hidden;
-            text-align: center;
         }
 
         #game-container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 0 20px var(--primary);
-            max-width: 90%;
-            width: 400px;
+            background: var(--panel);
+            width: 90%;
+            max-width: 450px;
+            padding: 25px;
+            border: 4px solid var(--accent);
+            border-radius: 40px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.2);
             position: relative;
         }
 
-        h1 { font-size: 1.5rem; margin-bottom: 20px; color: var(--primary); }
-        
-        .btn-container {
+        .header {
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            color: #888;
+        }
+
+        #iq-display {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin: 10px 0;
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        #q-area {
+            background: #000;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            margin-top: 20px;
+            font-size: 1.2rem;
+            border: 1px dashed var(--accent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
         button {
-            padding: 15px 25px;
-            font-size: 1rem;
-            cursor: pointer;
+            padding: 18px 10px;
             border: none;
-            border-radius: 10px;
-            transition: transform 0.1s, background 0.3s;
+            border-radius: 15px;
+            background: #252545;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        button:hover { background: #353565; transform: translateY(-2px); }
+        button:active { transform: scale(0.9); }
+
+        .footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
             font-weight: bold;
         }
 
-        .btn-left { background: var(--primary); color: #000; }
-        .btn-right { background: var(--secondary); color: #fff; }
-
-        button:active { transform: scale(0.9); }
-
-        .shake { animation: shake 0.5s; }
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            40% { transform: translate(3px, 2px) rotate(-1deg); }
-            100% { transform: translate(1px, -1px) rotate(0deg); }
-        }
-
-        #score-screen { display: none; }
         .hidden { display: none !important; }
         
-        #lvl-counter { position: absolute; top: 10px; right: 20px; font-size: 0.8rem; opacity: 0.5; }
+        /* Chaos Effects */
+        .shake { animation: shake 0.2s infinite; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-2px, -1px); }
+            100% { transform: translate(1px, -1px); }
+        }
+
+        .flash-red { animation: f-red 0.3s; }
+        @keyframes f-red { 0% { background: var(--fail); } 100% { background: var(--panel); } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="lvl-counter">Level: <span id="current-lvl">1</span>/50</div>
-    
-    <div id="quiz-screen">
-        <h1 id="question">Loading...</h1>
-        <div class="btn-container" id="button-wrapper">
-            <button id="btn1" class="btn-left" onclick="handleChoice(0)">Option A</button>
-            <button id="btn2" class="btn-right" onclick="handleChoice(1)">Option B</button>
+    <div class="header">
+        <span>LVL: <span id="l-num">1</span>/50</span>
+        <span id="rank-text">STATUS: GENIUS</span>
+    </div>
+
+    <div id="iq-display">IQ: 150</div>
+
+    <div id="play-zone">
+        <div id="q-area">Question goes here...</div>
+        <div class="grid" id="btn-grid">
+            <button onclick="check(0)" id="b0"></button>
+            <button onclick="check(1)" id="b1"></button>
+            <button onclick="check(2)" id="b2"></button>
+            <button onclick="check(3)" id="b3"></button>
         </div>
     </div>
 
-    <div id="score-screen">
-        <h1>RESULTS ARE IN...</h1>
-        <p style="font-size: 1.2rem;">You are officially:</p>
-        <div id="percentage" style="font-size: 3rem; color: var(--secondary); font-weight: bold;">0%</div>
-        <p id="rank-text">STUPID</p>
-        <button onclick="location.reload()" style="background: white; color: black; margin-top: 20px;">TRY TO BE LESS DUMB?</button>
+    <div id="end-zone" class="hidden">
+        <h1 style="color: var(--fail);">TEST COMPLETE</h1>
+        <p>Your Final Stupidity Score:</p>
+        <div id="final-perc" style="font-size: 3.5rem; font-weight: bold;">0%</div>
+        <p id="commentary" style="font-style: italic;"></p>
+        <button onclick="location.reload()" style="background: var(--accent); color: black; margin-top: 20px;">I CAN DO BETTER</button>
+    </div>
+
+    <div class="footer">
+        <span style="color: var(--success);">CLEVER: <span id="c-count">0</span></span>
+        <span style="color: var(--fail);">STUPID: <span id="s-count">0</span></span>
     </div>
 </div>
 
 <script>
-    let currentLevel = 0;
-    let stupidScore = 0;
+    let cur = 0;
+    let stupid = 0;
+    let clever = 0;
+    let iq = 150;
 
     const questions = [
-        { q: "Click the Blue Button!", a: ["Blue", "Red"], correct: 0 },
-        { q: "Which is heavier: 1kg of Lead or 1kg of Feathers?", a: ["Lead", "Feathers"], correct: 1, twist: "Both are equal but feathers is funnier" },
-        { q: "Don't click the Right button!", a: ["Left", "Right"], correct: 0 },
-        { q: "What is 2 + 2?", a: ["4", "Fish"], correct: 1 },
-        { q: "Which button looks tastier?", a: ["This one", "No, this one"], correct: 0 },
-        { q: "Is this a game?", a: ["Yes", "Maybe"], correct: 1 },
-        { q: "Quick! Click the Red button!", a: ["Red", "Blue"], correct: 0 }, // Swapped colors in logic? No, just keep it simple.
-        { q: "The answer to this is B.", a: ["A", "B"], correct: 1 },
-        { q: "Wait, where is the question?", a: ["What?", "Here"], correct: 1 },
-        { q: "Square root of a Potato?", a: ["French Fries", "Mashed"], correct: 0 },
-        // Generating more levels programmatically for the sake of 50...
+        { q: "What is 1+1?", a: ["2", "11", "Window", "Both A & C"], c: 3 },
+        { q: "How many letters in 'The Alphabet'?", a: ["26", "11", "7", "None"], c: 1 },
+        { q: "What do cows drink?", a: ["Milk", "Water", "Grass", "Soda"], c: 1 },
+        { q: "Which animal says 'Meow'?", a: ["Cat", "Dog", "Tiger", "A Liar"], c: 3 },
+        { q: "Click the BLUE button.", a: ["Blue", "Red", "Green", "Yellow"], c: 0 },
+        { q: "If 1=5, 2=25, 3=125, what does 5=?", a: ["625", "3125", "1", "5"], c: 3 },
+        { q: "Spell 'POTATO' backwards.", a: ["OTATOP", "POTATO", "EGG", "OTAT-O"], c: 0 },
+        { q: "What color is an Orange?", a: ["Yellow", "Orange", "Red", "Fruit"], c: 1 },
+        { q: "Which is heavier: 1kg of Lead or 1kg of Air?", a: ["Lead", "Air", "Equal", "Lead (obviously)"], c: 2 },
+        { q: "Click the smallest number:", a: ["10", "1", "0.1", "The dot above the 'i'"], c: 3 },
+        { q: "Are you paying attention?", a: ["Yes", "No", "Maybe", "What?"], c: 3 },
+        { q: "Which of these is a shape?", a: ["Square", "Circle", "Triangle", "All of them"], c: 3 },
+        { q: "How many months have 28 days?", a: ["1", "6", "12", "Depends"], c: 2 },
+        { q: "What is 9 + 10?", a: ["19", "21", "910", "A mess"], c: 1 },
+        { q: "What is the capital of France?", a: ["Paris", "F", "London", "Berlin"], c: 1 },
+        { q: "If I have 2 apples and you take 2, how many do you have?", a: ["0", "2", "4", "None"], c: 1 },
+        { q: "Which way is Left?", a: ["Right", "Up", "Left", "That way"], c: 2 },
+        { q: "Can a match box?", a: ["No", "Yes", "Fire", "No, but a tin can"], c: 3 },
+        { q: "Is this question 19?", a: ["Yes", "No", "Maybe", "Level 19"], c: 0 },
+        { q: "Click the 'Next' button.", a: ["Finish", "Stop", "Back", "Next"], c: 3 },
+        // Random generation for the rest to reach 50
     ];
 
-    // Filling up to 50 levels with wacky stuff
-    for(let i = 11; i <= 50; i++) {
+    for(let i=21; i<=50; i++) {
         questions.push({
-            q: `Level ${i}: Click a button, any button.`,
-            a: [Math.random() > 0.5 ? "Wrong" : "Right", Math.random() > 0.5 ? "Stupid" : "Smart"],
-            correct: Math.floor(Math.random() * 2)
+            q: `Quick! Pick choice number ${(i % 4) + 1}!`,
+            a: ["Choice 1", "Choice 2", "Choice 3", "Choice 4"],
+            c: i % 4
         });
     }
 
-    function updateLevel() {
-        if (currentLevel >= questions.length) {
-            showResults();
+    function render() {
+        if(cur >= questions.length) {
+            finish();
             return;
         }
-
-        const qData = questions[currentLevel];
-        const qElement = document.getElementById('question');
-        const btn1 = document.getElementById('btn1');
-        const btn2 = document.getElementById('btn2');
         
-        qElement.innerText = qData.q;
-        btn1.innerText = qData.a[0];
-        btn2.innerText = qData.a[1];
-        document.getElementById('current-lvl').innerText = currentLevel + 1;
-
-        // Apply "Twists"
-        const wrapper = document.getElementById('button-wrapper');
-        wrapper.style.flexDirection = Math.random() > 0.7 ? "row-reverse" : "row";
-        if(currentLevel % 5 === 0) {
-            document.getElementById('game-container').classList.add('shake');
-            setTimeout(() => document.getElementById('game-container').classList.remove('shake'), 500);
+        const data = questions[cur];
+        document.getElementById('l-num').innerText = cur + 1;
+        document.getElementById('q-area').innerText = data.q;
+        
+        let indices = [0, 1, 2, 3];
+        // Chaos Mode: After Level 25, shuffle button display
+        if(cur > 25) {
+            indices.sort(() => Math.random() - 0.5);
+            document.getElementById('game-container').classList.toggle('shake', Math.random() > 0.8);
         }
+
+        indices.forEach((val, i) => {
+            const btn = document.getElementById(`b${i}`);
+            btn.innerText = data.a[val];
+            btn.onclick = () => check(val);
+            // Randomly change colors in chaos mode
+            if(cur > 35) btn.style.background = `hsl(${Math.random()*360}, 50%, 30%)`;
+        });
     }
 
-    function handleChoice(index) {
-        if (index !== questions[currentLevel].correct) {
-            stupidScore++;
+    function check(idx) {
+        if(idx === questions[cur].c) {
+            clever++;
+            document.getElementById('c-count').innerText = clever;
+        } else {
+            stupid++;
+            iq -= 4;
+            document.getElementById('s-count').innerText = stupid;
+            document.getElementById('iq-display').innerText = "IQ: " + iq;
+            document.getElementById('game-container').classList.add('flash-red');
+            setTimeout(() => document.getElementById('game-container').classList.remove('flash-red'), 300);
         }
-        
-        currentLevel++;
-        updateLevel();
+
+        // Rank Logic
+        let r = "GENIUS";
+        if(iq < 120) r = "AVERAGE";
+        if(iq < 90) r = "DIM";
+        if(iq < 60) r = "POTATO";
+        if(iq < 30) r = "ERR_BRAIN_NOT_FOUND";
+        document.getElementById('rank-text').innerText = "STATUS: " + r;
+
+        cur++;
+        render();
     }
 
-    function showResults() {
-        document.getElementById('quiz-screen').classList.add('hidden');
-        document.getElementById('score-screen').style.display = 'block';
+    function finish() {
+        document.getElementById('play-zone').classList.add('hidden');
+        document.getElementById('end-zone').classList.remove('hidden');
+        const score = Math.round((stupid / 50) * 100);
+        document.getElementById('final-perc').innerText = score + "% STUPID";
         
-        const percent = Math.round((stupidScore / 50) * 100);
-        document.getElementById('percentage').innerText = percent + "% STUPID";
-        
-        let rank = "GENIUS (Liar)";
-        if(percent > 20) rank = "Slightly Dim";
-        if(percent > 50) rank = "Certified Potato";
-        if(percent > 80) rank = "A Toaster could do better";
-        if(percent >= 98) rank = "THE STUPID KING";
-        
-        document.getElementById('rank-text').innerText = rank;
+        let msg = "You're actually quite smart!";
+        if(score > 40) msg = "You might want to go back to school.";
+        if(score > 70) msg = "How did you manage to open this website?";
+        if(score >= 95) msg = "You are a legendary level of stupid.";
+        document.getElementById('commentary').innerText = msg;
     }
 
-    // Initialize
-    updateLevel();
+    render();
 </script>
 
 </body>
