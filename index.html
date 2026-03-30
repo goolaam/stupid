@@ -1,15 +1,140 @@
-            setTimeout(() => { cur++; render(); }, 1200);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Void Hunter</title>
+    <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; touch-action: none; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 20px; left: 20px; color: #0f0; pointer-events: none; text-shadow: 0 0 5px #0f0; }
+        #score-board { font-size: 2rem; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div id="score-board">000</div>
+        <div id="msg">DEFEND THE CORE</div>
+    </div>
+    <script>
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        document.body.appendChild(canvas);
+
+        let width, height, score = 0;
+        let particles = [];
+        let enemies = [];
+        let wells = [];
+        let frame = 0;
+
+        class Particle {
+            constructor() {
+                this.x = window.innerWidth / 2;
+                this.y = window.innerHeight / 2;
+                this.vx = Math.random() * 4 - 2;
+                this.vy = Math.random() * 4 - 2;
+                this.radius = 3;
+            }
+            update() {
+                wells.forEach(w => {
+                    const dx = w.x - this.x, dy = w.y - this.y;
+                    const d = Math.sqrt(dx*dx + dy*dy);
+                    this.vx += (dx/d) * (w.s / (d + 10));
+                    this.vy += (dy/d) * (w.s / (d + 10));
+                });
+                this.x += this.vx; this.y += this.vy;
+                this.vx *= 0.99; this.vy *= 0.99;
+                
+                // Keep in bounds
+                if(this.x < 0 || this.x > width) this.vx *= -1;
+                if(this.y < 0 || this.y > height) this.vy *= -1;
+            }
+            draw() {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
+            }
         }
-    }
 
-    function finish() {
-        document.getElementById('quiz-box').classList.add('hidden');
-        document.getElementById('end-box').classList.remove('hidden');
-        document.getElementById('final-iq').innerText = iq;
-        document.getElementById('desc').innerText = iq < 50 ? "You are a biological error." : "Barely sentient.";
-    }
+        class Enemy {
+            constructor() {
+                const side = Math.floor(Math.random() * 4);
+                if(side === 0) { this.x = Math.random()*width; this.y = -20; }
+                else if(side === 1) { this.x = Math.random()*width; this.y = height+20; }
+                else if(side === 2) { this.x = -20; this.y = Math.random()*height; }
+                else { this.x = width+20; this.y = Math.random()*height; }
+                this.speed = 1 + (score / 500);
+            }
+            update() {
+                const dx = (width/2) - this.x;
+                const dy = (height/2) - this.y;
+                const d = Math.sqrt(dx*dx + dy*dy);
+                this.x += (dx/d) * this.speed;
+                this.y += (dy/d) * this.speed;
 
-    render();
-</script>
+                // Collision with Particles
+                particles.forEach((p, pi) => {
+                    const pdx = p.x - this.x, pdy = p.y - this.y;
+                    const pd = Math.sqrt(pdx*pdx + pdy*pdy);
+                    if(pd < 15) {
+                        const velocity = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+                        if(velocity > 3) { // Destroy enemy
+                            enemies.splice(enemies.indexOf(this), 1);
+                            score += 10;
+                            document.getElementById('score-board').innerText = score.toString().padStart(3, '0');
+                        } else { // Kill player particle
+                            particles.splice(pi, 1);
+                        }
+                    }
+                });
+
+                if(Math.sqrt((width/2-this.x)**2 + (height/2-this.y)**2) < 30) {
+                    location.reload(); // Game Over
+                }
+            }
+            draw() {
+                ctx.fillStyle = '#f00';
+                ctx.shadowBlur = 10; ctx.shadowColor = '#f00';
+                ctx.beginPath(); ctx.arc(this.x, this.y, 8, 0, Math.PI*2); ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            particles = Array.from({length: 15}, () => new Particle());
+            enemies = [];
+            score = 0;
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(0,0,width,height);
+            
+            // Core
+            ctx.strokeStyle = '#0f0';
+            ctx.beginPath(); ctx.arc(width/2, height/2, 30, 0, Math.PI*2); ctx.stroke();
+
+            if(frame % 60 === 0) enemies.push(new Enemy());
+
+            particles.forEach(p => { p.update(); p.draw(); });
+            enemies.forEach(e => { e.update(); e.draw(); });
+            wells = wells.filter(w => { w.s *= 0.9; return w.s > 0.1; });
+
+            frame++;
+            if(particles.length === 0) location.reload();
+            requestAnimationFrame(animate);
+        }
+
+        const handle = (e) => {
+            const t = e.touches ? e.touches[0] : e;
+            wells.push({x: t.clientX, y: t.clientY, s: 15});
+        };
+
+        window.addEventListener('touchstart', handle);
+        window.addEventListener('touchmove', handle);
+        window.addEventListener('mousedown', handle);
+        init(); animate();
+    </script>
 </body>
 </html>
